@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.content.ContextCompat.startActivity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -123,7 +125,7 @@ fun wybor_Tygodnia_ExposedDropDownMenu(): Int {
     val context = LocalContext.current
     val Tygodnie = mutableListOf<String>()
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-    var option = 0
+    var option by remember { mutableStateOf(-1) }
     for (i in 0..6) {
         val end = firstDay.plusDays(6)
         val tydzienn = "${firstDay.format(formatter)} - ${end.format(formatter)}"
@@ -177,16 +179,21 @@ fun wybor_Tygodnia_ExposedDropDownMenu(): Int {
 }
 @Composable
 fun Zacznij(trening: String, numer: Int){
-
+    var context = LocalContext.current
     Button(
         onClick = {
-
+            if (trening == "Wybierz trening" || numer == -1) {
+                Toast.makeText(context, "Wybierz trening i tydzień", Toast.LENGTH_SHORT).show()
+            } else {
+                val intent = Intent(context, Trening::class.java)
+                startActivity(context, intent, null)
+            }
         },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(text = "Zacznij trening: $trening")
+        Text(text = "Zacznij trening")
     }
 }
 @RequiresApi(Build.VERSION_CODES.O)

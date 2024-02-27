@@ -112,7 +112,10 @@ fun dodaj_plan(text : String, context : Context){
     for (i in 1 until parts.size){
         val fille = File(context.filesDir, "TRENING_$i")
         val infoo = parts[i].split(delimeter)
-        file2.appendText(infoo[0] + "\n")
+        if (i==parts.size-1)
+            file2.appendText(infoo[0])
+        else
+            file2.appendText(infoo[0] + "\n")
         fille.writeText(info.joinToString("\n"))
     }
 }

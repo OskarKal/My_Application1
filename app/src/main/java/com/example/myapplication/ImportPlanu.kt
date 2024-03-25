@@ -110,13 +110,15 @@ fun dodaj_plan(text : String, context : Context){
     //Zapisanie TRENIGÓW
     val file2 = File (context.filesDir, "TRENING_NAZWY")
     for (i in 1 until parts.size){
-        val fille = File(context.filesDir, "TRENING_$i")
+        val dir = File(context.filesDir, "TRENING_$i")
+        dir.mkdir()
         val infoo = parts[i].split(delimeter)
         if (i==parts.size-1)
             file2.appendText(infoo[0])
         else
             file2.appendText(infoo[0] + "\n")
-        fille.writeText(info.joinToString("\n"))
+        //fille.writeText(info.joinToString("\n"))
+
     }
 }
 

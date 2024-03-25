@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyComposable(refresh : Int){
-    var wybrany: String
+    var wybrany: Int
     var tydzien: Int
     MyApplicationTheme {
         val context = LocalContext.current
@@ -71,7 +71,7 @@ fun MyComposable(refresh : Int){
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                Text(text = refresh.toString())
+
                 wybrany = trening_ExposedDropdownMenu()
                 tydzien = wybor_Tygodnia_ExposedDropDownMenu()
 
@@ -83,8 +83,9 @@ fun MyComposable(refresh : Int){
                 ){
                     Button(
                         onClick = {
-
                             val intent = Intent(context, ImportPlanu::class.java)
+                            intent.putExtra("trening", wybrany)
+                            intent.putExtra("tydzien", tydzien)
                             startActivity(context, intent, null)
                         },
                         modifier = Modifier
@@ -101,21 +102,21 @@ fun MyComposable(refresh : Int){
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun trening_ExposedDropdownMenu(): String {
+fun trening_ExposedDropdownMenu(): Int {
     val context = LocalContext.current
     val file = File(context.filesDir, "TRENING_INFO")
     if (!file.exists()){
         Text(text = "Brak planu treningowego")
-        return ""
+        return -1
     }
     val file2 = File(context.filesDir, "TRENING_NAZWY")
     if (!file2.exists()){
         Text(text = "Błąd")
-        return ""
+        return -1
     }
     val Treningi = file2.readText().split("\n")
     var expanded by remember { mutableStateOf(false) }
-    var wybranyTrening by remember { mutableStateOf(Treningi[0]) }
+    var wybranyTrening by remember { mutableIntStateOf(0) }
     var wasChosen by remember { mutableStateOf(false) }
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -131,7 +132,7 @@ fun trening_ExposedDropdownMenu(): String {
             TextField(
 
                 value = when (wasChosen) {
-                    true -> wybranyTrening
+                    true -> Treningi[wybranyTrening]
                     false -> "Wybierz trening"
                 },
                 onValueChange = {},
@@ -143,12 +144,23 @@ fun trening_ExposedDropdownMenu(): String {
             )
 
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                Treningi.forEach { trening ->
+                /*Treningi.forEach { trening ->
                     DropdownMenuItem(
                         text = { Text(text  = trening) },
                         onClick = {
                             wasChosen = true
                             wybranyTrening = trening
+                            expanded = false
+                            Toast.makeText(context, "Wybrano trening: $wybranyTrening", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }*/
+                for (i in Treningi.indices){
+                    DropdownMenuItem(
+                        text = { Text(text  = Treningi[i]) },
+                        onClick = {
+                            wasChosen = true
+                            wybranyTrening = i
                             expanded = false
                             Toast.makeText(context, "Wybrano trening: $wybranyTrening", Toast.LENGTH_SHORT).show()
                         }
@@ -173,7 +185,7 @@ fun wybor_Tygodnia_ExposedDropDownMenu(): Int {
     var firstDay = LocalDate.parse(info[0])
     val Tygodnie = mutableListOf<String>()
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-    var option by remember { mutableStateOf(-1) }
+    var option by remember { mutableIntStateOf(-1) }
 
     for (i in 0 until info[1].toInt()) {
         val end = firstDay.plusDays(6)
@@ -226,17 +238,15 @@ fun wybor_Tygodnia_ExposedDropDownMenu(): Int {
             }
         }
     }
-    return 1
-    //return option
+    return option
 }
 @Composable
-fun Zacznij(trening: String, numer_tygodnia: Int){
+fun Zacznij(trening: Int, numer_tygodnia: Int){
     val context = LocalContext.current
-    if (numer_tygodnia == -2) return
     Button(
         onClick = {
 
-            if (trening == "Wybierz trening" || numer_tygodnia == -1) {
+            if (trening == -1|| numer_tygodnia == -1) {
                 Toast.makeText(context, "Wybierz trening i tydzień", Toast.LENGTH_SHORT).show()
             } else {
                 val intent = Intent(context, Trening::class.java)
@@ -262,8 +272,6 @@ fun Previev(modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .padding(20.dp),
             //place the column slightly below the top of the screen
-
-
             horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
         ){
             var wybrany = trening_ExposedDropdownMenu()
